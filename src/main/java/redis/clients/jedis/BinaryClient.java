@@ -1,28 +1,33 @@
 package redis.clients.jedis;
 
-import redis.clients.jedis.Protocol.*;
-import redis.clients.jedis.params.geo.GeoRadiusParam;
-import redis.clients.jedis.params.sortedset.ZAddParams;
-import redis.clients.jedis.params.sortedset.ZIncrByParams;
-import redis.clients.util.SafeEncoder;
+import static redis.clients.jedis.Protocol.toByteArray;
+import static redis.clients.jedis.Protocol.Command.*;
+import static redis.clients.jedis.Protocol.Keyword.ENCODING;
+import static redis.clients.jedis.Protocol.Keyword.IDLETIME;
+import static redis.clients.jedis.Protocol.Keyword.LEN;
+import static redis.clients.jedis.Protocol.Keyword.LIMIT;
+import static redis.clients.jedis.Protocol.Keyword.NO;
+import static redis.clients.jedis.Protocol.Keyword.ONE;
+import static redis.clients.jedis.Protocol.Keyword.REFCOUNT;
+import static redis.clients.jedis.Protocol.Keyword.RESET;
+import static redis.clients.jedis.Protocol.Keyword.STORE;
+import static redis.clients.jedis.Protocol.Keyword.WITHSCORES;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import static redis.clients.jedis.Protocol.Command.*;
-import static redis.clients.jedis.Protocol.Command.EXISTS;
-import static redis.clients.jedis.Protocol.Command.PSUBSCRIBE;
-import static redis.clients.jedis.Protocol.Command.PUNSUBSCRIBE;
-import static redis.clients.jedis.Protocol.Command.SUBSCRIBE;
-import static redis.clients.jedis.Protocol.Command.UNSUBSCRIBE;
-import static redis.clients.jedis.Protocol.Keyword.*;
-import static redis.clients.jedis.Protocol.toByteArray;
-
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLParameters;
 import javax.net.ssl.SSLSocketFactory;
+
+import redis.clients.jedis.Protocol.Command;
+import redis.clients.jedis.Protocol.Keyword;
+import redis.clients.jedis.params.geo.GeoRadiusParam;
+import redis.clients.jedis.params.sortedset.ZAddParams;
+import redis.clients.jedis.params.sortedset.ZIncrByParams;
+import redis.clients.util.SafeEncoder;
 
 public class BinaryClient extends Connection {
   public enum LIST_POSITION {
@@ -71,7 +76,7 @@ public class BinaryClient extends Connection {
   public boolean isInWatch() {
     return isInWatch;
   }
-  
+
   private byte[][] joinParameters(byte[] first, byte[][] rest) {
     byte[][] result = new byte[rest.length + 1][];
     result[0] = first;
@@ -142,6 +147,10 @@ public class BinaryClient extends Connection {
 
   public void keys(final byte[] pattern) {
     sendCommand(KEYS, pattern);
+  }
+
+  public void keys(final byte[] start, final byte[] end, final byte[] num) {
+      sendCommand(KEYS, start, end, num);
   }
 
   public void randomKey() {
@@ -936,7 +945,8 @@ public class BinaryClient extends Connection {
     return db;
   }
 
-  public void disconnect() {
+  @Override
+public void disconnect() {
     db = 0;
     super.disconnect();
   }
@@ -1166,7 +1176,7 @@ public class BinaryClient extends Connection {
   /**
    * This method is deprecated due to bug (scan cursor should be unsigned long)
    * And will be removed on next major release
-   * @see https://github.com/xetorthio/jedis/issues/531 
+   * @see https://github.com/xetorthio/jedis/issues/531
    */
   public void hscan(final byte[] key, int cursor, final ScanParams params) {
     final List<byte[]> args = new ArrayList<byte[]>();
@@ -1180,7 +1190,7 @@ public class BinaryClient extends Connection {
   /**
    * This method is deprecated due to bug (scan cursor should be unsigned long)
    * And will be removed on next major release
-   * @see https://github.com/xetorthio/jedis/issues/531 
+   * @see https://github.com/xetorthio/jedis/issues/531
    */
   public void sscan(final byte[] key, int cursor, final ScanParams params) {
     final List<byte[]> args = new ArrayList<byte[]>();
@@ -1194,7 +1204,7 @@ public class BinaryClient extends Connection {
   /**
    * This method is deprecated due to bug (scan cursor should be unsigned long)
    * And will be removed on next major release
-   * @see https://github.com/xetorthio/jedis/issues/531 
+   * @see https://github.com/xetorthio/jedis/issues/531
    */
   public void zscan(final byte[] key, int cursor, final ScanParams params) {
     final List<byte[]> args = new ArrayList<byte[]>();
